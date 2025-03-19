@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bienvenido</title>
+</head>
+<body>
+    <nav>
+        <ul>
+           <a href=""></a>
+        </ul>
+    </nav>
+    <a href="{{ url_for('verinformacion.ver_proveedores') }}"> Proveedores</a>
+    <a href="{{ url_for('verinformacion.ver_remesas') }}"> remesas</a>
+    <a href="{{ url_for('verinformacion.ver_ventas') }}"> ventas</a>
+    <a href="{{ url_for('verinformacion.ver_pacientes') }}"> pacientes</a>
+    <a href="{{ url_for('verinformacion.ver_inventarios') }}"> inventarios</a>
+    <a href="{{ url_for('verinformacion.ver_pagos') }}"> Pagos</a>
+    
+    <h1>¡Bienvenido {{ session['usuario'] }}!</h1>
+    <p>Estás dentro del sistema.</p>
+</body>
+</html>

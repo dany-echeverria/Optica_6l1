@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/ventas.css') }}">
+</head>
+<body>
+     <!-- Barra de tareas en el lado izquierdo -->
+     <div class="task-bar"></div>
+
+     <main class="main-container">
+         <h1 class="page-title">Tabla Ventas</h1>
+ 
+         <!-- Barra de búsqueda y botones dentro del main -->
+         <div class="input-container">
+             <input type="text" class="search-input" placeholder="Buscar...">
+             <div class="button-container">
+                 <button class="square-button">Actualizar</button>
+                 <a href="{{ url_for('create.agregar_venta') }}">
+                    <button>Crear</button>
+                </a>
+                 <button class="square-button">Borrar</button>
+                 <button class="square-button">Adelante</button>
+                 <button class="square-button">Atras</button>
+             </div>
+         </div>
+ 
+         <!-- Tabla -->
+         <table class="table">
+             <thead>
+                 <tr>
+                    <th class="table-header">id_venta</th>
+                     <th class="table-header">Paciente</th>
+                     <th class="table-header">Graduacion</th>
+                     <th class="table-header">Armason</th>
+                     <th class="table-header">Tratamiento</th>
+                     <th class="table-header">Anticipo</th>
+                     <th class="table-header">Adeudo</th>
+                     <th class="table-header">Fecha</th>
+                 </tr>
+             </thead>
+             <tbody>
+                {% for ventas in datos %}
+                <tr>
+                    <td>{{ ventas.Id_venta }}</td>  <!-- Primera columna (ID) -->
+                    <td>{{ ventas.Id_Paciente }}</td>  <!-- Segunda columna (Campo 1) -->
+                    <td>{{ ventas.Graduacion }}</td>
+                    <td>{{ ventas.Armason }}</td>
+                    <td>{{ ventas.Tratamiento }}</td>
+                    <td>{{ ventas.Anticipo }}</td>
+                    <td>{{ ventas.Adeudo }}</td>  <!-- Tercera columna (Campo 2) -->
+                    <td>{{ ventas.Fecha }}</td>  <!-- Tercera columna (Campo 2) -->
+                </tr>
+                {% endfor %}
+             </tbody>
+         </table>
+     </main>
+     <a href="{{ url_for('bienvenida') }}">Regresar</a>
+
+</body>
+</html>
