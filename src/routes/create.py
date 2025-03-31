@@ -1,10 +1,9 @@
-# routes/create.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from db import db
 from models import Remesa, Inventario, Proveedores, Ventas, Pagos, Paciente
 
 # Definir el Blueprint para agregar información
-create_bp = Blueprint('create', __name__, url_prefix='/crear')  # El url_prefix ya está correctamente establecido.
+create_bp = Blueprint('create', __name__, url_prefix='/crear')
 
 # Ruta para agregar remesas
 @create_bp.route('/agregar_remesa', methods=['GET', 'POST'])
@@ -38,12 +37,13 @@ def agregar_remesa():
 
         # Mostrar mensaje de éxito y redirigir
         flash('Remesa agregada con éxito', 'success')
-        return redirect(url_for('create.agregar_remesa'))  # Correcto, vuelve a la misma página
+        return redirect(url_for('create.agregar_remesa'))
 
     # Si el método es GET, mostrar el formulario para agregar remesa
     return render_template('crearinformacion/remesa.html')
 
 
+# Ruta para agregar inventario
 @create_bp.route('/agregar_inventario', methods=['GET', 'POST'])
 def agregar_inventario():
     if request.method == 'POST':
@@ -76,18 +76,8 @@ def agregar_inventario():
         return redirect(url_for('create.agregar_inventario'))
 
     # Si el método es GET, obtener las listas de inventarios y proveedores para el formulario
-    
     proveedores = Proveedores.query.all()  # Aquí consulta los proveedores desde el modelo Proveedores
-    
-    # Extraer solo los atributos necesarios de los productos
-  
-
-    # Pasar las listas a la plantilla
-    return render_template('crearinformacion/inventario.html',  proveedores=proveedores)
-
-
-
-
+    return render_template('crearinformacion/inventario.html', proveedores=proveedores)
 
 
 # Ruta para agregar proveedor
@@ -118,12 +108,13 @@ def agregar_proveedor():
 
         # Mostrar mensaje de éxito y redirigir
         flash('Proveedor agregado con éxito', 'success')
-        return redirect(url_for('create.agregar_proveedor'))  # Correcto, vuelve a la misma página
+        return redirect(url_for('create.agregar_proveedor'))
 
     # Si el método es GET, mostrar el formulario para agregar proveedor
     return render_template('crearinformacion/proveedores.html')
 
 
+# Ruta para agregar venta
 @create_bp.route('/agregar_venta', methods=['GET', 'POST'])
 def agregar_venta():
     if request.method == 'POST':
@@ -139,15 +130,13 @@ def agregar_venta():
         # Crear una nueva instancia de Venta
         nueva_venta = Ventas(
             Id_Paciente=Id_Paciente,
-            Graduacion=Graduacion,  # Ahora coincide con el modelo
+            Graduacion=Graduacion,
             Armason=Armason,
             Tratamiento=Tratamiento,
             Anticipo=Anticipo,
             Adeudo=Adeudo,
             Fecha=Fecha
         )
-
-
 
         # Agregar la nueva venta a la base de datos
         db.session.add(nueva_venta)
@@ -161,14 +150,9 @@ def agregar_venta():
     return render_template('crearinformacion/ventas.html', pacientes=pacientes)
 
 
-
-
-
-
-
+# Ruta para agregar pago
 @create_bp.route('/agregar_pago', methods=['GET', 'POST'])
 def agregar_pago():
-    # Obtener pacientes y ventas desde la base de datos
     pacientes = Paciente.query.all()
     ventas = Ventas.query.all()
 
@@ -197,17 +181,13 @@ def agregar_pago():
         db.session.add(nueva_pago)
         db.session.commit()
 
-        # Mensaje de éxito y redirección
         flash('Pago agregado con éxito', 'success')
         return redirect(url_for('create.agregar_pago'))
 
-    # Si el método es GET, mostrar el formulario con los datos de pacientes y ventas
     return render_template('crearinformacion/pagos.html', pacientes=pacientes, ventas=ventas)
 
 
-
-
-
+# Ruta para agregar paciente
 @create_bp.route('/agregar_paciente', methods=['GET', 'POST'])
 def agregar_paciente():
     if request.method == 'POST':
@@ -219,9 +199,8 @@ def agregar_paciente():
         Dirección = request.form['Dirección']
         Correo = request.form['Correo']
 
-        # Crear una nueva instancia de Venta
-        nueva_paciente = Pagos(
-            
+        # Crear una nueva instancia de Paciente
+        nuevo_paciente = Paciente(
             Nombre_Pa=Nombre_Pa,
             Apellidos=Apellidos,
             Teléfono1=Teléfono1,
@@ -230,16 +209,11 @@ def agregar_paciente():
             Correo=Correo
         )
 
-        # Agregar la nueva venta a la base de datos
-        db.session.add(nueva_paciente)
+        # Agregar el nuevo paciente a la base de datos
+        db.session.add(nuevo_paciente)
         db.session.commit()
 
-        # Mostrar mensaje de éxito y redirigir
-        flash('Paciente agregado con exito', 'success')
-        return redirect(url_for('create.agregar_paciente'))  # Correcto, vuelve a la misma página
+        flash('Paciente agregado con éxito', 'success')
+        return redirect(url_for('create.agregar_paciente'))
 
-    # Si el método es GET, mostrar el formulario para agregar venta
     return render_template('crearinformacion/pacientes.html')
-
-
-

@@ -4,15 +4,18 @@ from db import db
 # Modelos de la base de datos 
 class Inventario(db.Model):
     __tablename__ = 'inventario'
-    __table_args__ = {'extend_existing': True}  # Para evitar errores con nombres de columnas
+    __table_args__ = {'extend_existing': True}
     
-    Código_Prod = db.Column(db.Integer, primary_key=True)  # Corregido a mayúsculas
-    Id_Proveedor = db.Column(db.Integer)
+    Código_Prod = db.Column(db.Integer, primary_key=True)
+    Id_Proveedor = db.Column(db.Integer, db.ForeignKey('proveedores.Id_Proveedor'))
     Nombre_Prod = db.Column(db.Text)
     Precio = db.Column(db.Numeric(10, 2))
     Modelo = db.Column(db.Text)
     Cantidad = db.Column(db.Integer)
     Materiales = db.Column(db.Text)
+
+    proveedor = db.relationship('Proveedores', backref='productos')
+
 
 
 class Proveedores(db.Model):

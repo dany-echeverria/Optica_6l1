@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proveedores</title>
+    <title>Pacientes</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/paciente.css') }}">
 </head>
 <body>
@@ -15,15 +15,15 @@
 
         <!-- Barra de búsqueda y botones dentro del main -->
         <div class="input-container">
-            <input type="text" class="search-input" placeholder="Buscar...">
+            <input type="text" class="search-input" placeholder="Buscar por nombre...">
             <div class="button-container">
-                <button class="square-button">Actualizar</button>
+                <button class="square-button actualizar">Actualizar</button>
+                
                 <a href="{{ url_for('create.agregar_paciente') }}">
-
-                    <button>Agregar Inventario</button>
+                    <button>Agregar Paciente</button>
                 </a>
-                <button class="square-button">Actualizar</button>
-                <button class="square-button">Borrar</button>
+                
+                <button class="square-button borrar">Borrar</button>
                 <button class="square-button">Adelante</button>
                 <button class="square-button">Atrás</button>
             </div>
@@ -33,25 +33,29 @@
         <table>
             <thead>
                 <tr>
-                    
-                    <th>Nombre_Pa</th>
+                    <th>Selecionar</th>
+                    <th>Nombre</th>
                     <th>Apellidos</th>
-                    <th>Teléfono1</th>
-                    <th>Teléfono2</th>
+                    <th>Teléfono 1</th>
+                    <th>Teléfono 2</th>
                     <th>Dirección</th>
                     <th>Correo</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for pacientes in datos %}
+            <tbody id="paciente-table-body">
+                {% for paciente in datos %}
                     <tr>
-                        
-                        <td>{{ pacientes.Nombre_Pa }}</td>
-                        <td>{{ pacientes.Apellidos }}</td>
-                        <td>{{ pacientes.Teléfono1 }}</td>
-                        <td>{{ pacientes.Teléfono2 }}</td>
-                        <td>{{ pacientes.Dirección }}</td>
-                        <td>{{ pacientes.Correo }}</td>
+                        <td><input type="radio" name="selectRow" class="selectRow" data-id="{{ paciente.Id_Paciente }}" data-nombre="{{ paciente.Nombre_Pa }}"></td>
+                        <td>{{ paciente.Nombre_Pa }}</td>
+                        <td>{{ paciente.Apellidos }}</td>
+                        <td>{{ paciente.Teléfono1 }}</td>
+                        <td>{{ paciente.Teléfono2 }}</td>
+                        <td>{{ paciente.Dirección }}</td>
+                        <td>{{ paciente.Correo }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="7">No hay pacientes disponibles.</td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -59,5 +63,75 @@
     </main>
 
     <a href="{{ url_for('bienvenida') }}">Regresar</a>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let selectedRow = null;
+
+            // Función para seleccionar un paciente al hacer clic en un radio button
+            document.querySelectorAll(".selectRow").forEach(radio => {
+                radio.addEventListener("change", function() {
+                    if (selectedRow) {
+                        selectedRow.classList.remove("selected");
+                    }
+                    selectedRow = this.closest("tr");
+                    selectedRow.classList.add("selected");
+                });
+            });
+
+            // Función para actualizar un paciente
+            document.querySelector(".square-button.actualizar").addEventListener("click", function() {
+                if (selectedRow) {
+                    const pacienteId = selectedRow.querySelector(".selectRow").dataset.id;
+                    window.location.href = `/actualizar/editar_paciente/${pacienteId}`;
+                } else {
+                    alert("Selecciona un paciente para actualizar.");
+                }
+            });
+
+            // Función para borrar un paciente
+            document.querySelector(".square-button.borrar").addEventListener("click", function() {
+                if (selectedRow) {
+                    const pacienteId = selectedRow.querySelector(".selectRow").dataset.id;
+
+                    if (confirm("¿Estás seguro de que deseas eliminar este paciente?")) {
+                        fetch(`/eliminar/borrar_paciente/${pacienteId}`, { 
+                            method: 'DELETE' 
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("Paciente eliminado con éxito.");
+                                selectedRow.remove(); // Elimina la fila de la tabla
+                            } else {
+                                alert("Error al eliminar el paciente: " + data.message);
+                            }
+                        })
+                        .catch(error => console.error("Error:", error));
+                    }
+                } else {
+                    alert("Selecciona un paciente para borrar.");
+                }
+            });
+
+            // Función para la búsqueda de pacientes
+            const searchInput = document.querySelector(".search-input");
+
+            searchInput.addEventListener("input", function() {
+                const filter = searchInput.value.toLowerCase();
+                const rows = document.querySelectorAll("table tbody tr");
+
+                rows.forEach(row => {
+                    const nombrePaciente = row.querySelector("td:nth-child(2)").textContent.toLowerCase(); // Nombre está en la segunda columna
+
+                    if (nombrePaciente.indexOf(filter) > -1) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

@@ -17,15 +17,13 @@
         <div class="input-container">
             <input type="text" class="search-input" placeholder="Buscar...">
             <div class="button-container">
-                <button class="square-button">Actualizar</button>
-                <button class="square-button">Borrar</button>
-                <button class="square-button">Adelante</button>
-                <button class="square-button">Actualizar</button>
+                <button class="square-button actualizar">Actualizar</button>
+                <button class="square-button borrar">Borrar</button>
+                <button class="square-button adelante">Adelante</button>
                 <a href="{{ url_for('create.agregar_pago') }}">
-
-                    <button>Agregar Inventario</button>
+                    <button>Agregar Pago</button>
                 </a>
-                <button class="square-button">Atrás</button>
+                <button class="square-button atras">Atrás</button>
             </div>
         </div>
 
@@ -33,25 +31,31 @@
         <table>
             <thead>
                 <tr>
+                    <th>Seleccionar</th>
                     <th>Id_Pago</th>
                     <th>Id_Paciente</th>
                     <th>Id_Venta</th>
-                    <th>SaldoAPagar</th>
+                    <th>Saldo A Pagar</th>
                     <th>Abono</th>
-                    <th>SaldoActual</th>
+                    <th>Saldo Actual</th>
                     <th>Fecha</th>
                 </tr>
             </thead>
             <tbody>
-                {% for pagos in datos %}
+                {% for pago in datos %}
                     <tr>
-                        <td>{{ pagos.Id_Pago }}</td>
-                        <td>{{ pagos.Id_Paciente }}</td>
-                        <td>{{ pagos.Id_Venta }}</td>
-                        <td>{{ pagos.SaldoAPagar }}</td>
-                        <td>{{ pagos.Abono }}</td>
-                        <td>{{ pagos.SaldoActual }}</td>
-                        <td>{{ pagos.Fecha }}</td>
+                        <td><input type="radio" name="selectRow" class="selectRow" data-id="{{ pago.Id_Pago }}" data-id_paciente="{{ pago.Id_Paciente }}"></td>
+                        <td>{{ pago.Id_Pago }}</td>
+                        <td>{{ pago.Id_Paciente }}</td>
+                        <td>{{ pago.Id_Venta }}</td>
+                        <td>{{ pago.SaldoAPagar }}</td>
+                        <td>{{ pago.Abono }}</td>
+                        <td>{{ pago.SaldoActual }}</td>
+                        <td>{{ pago.Fecha }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8">No hay pagos registrados.</td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -60,5 +64,90 @@
 
     <a href="{{ url_for('bienvenida') }}">Regresar</a>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+    let selectedRow = null;
+
+    // Funcionalidad de seleccionar una fila al hacer clic en el radio button
+    document.querySelectorAll(".selectRow").forEach(radio => {
+        radio.addEventListener("change", function() {
+            // Desmarcar la fila anterior
+            if (selectedRow) {
+                selectedRow.classList.remove("selected");
+            }
+            // Marcar la fila actual
+            selectedRow = this.closest("tr");
+            selectedRow.classList.add("selected");
+        });
+    });
+
+    // Funcionalidad del botón de actualizar
+    document.querySelector(".square-button.actualizar").addEventListener("click", function() {
+        if (selectedRow) {
+            const pagoId = selectedRow.querySelector(".selectRow").dataset.id;  // Obtener Id_Pago
+            window.location.href = `/actualizar/editar_pago/${pagoId}`;  // Redirigir a la página de edición
+        } else {
+            alert("Selecciona un pago para actualizar.");
+        }
+    });
+
+    // Funcionalidad del botón de borrar
+    document.querySelector(".square-button.borrar").addEventListener("click", function() {
+        if (selectedRow) {
+            const pagoId = selectedRow.querySelector(".selectRow").dataset.id;  // Obtener el Id del pago seleccionado
+            console.log(`ID del pago seleccionado: ${pagoId}`);  // Depuración
+
+            const confirmDelete = confirm("¿Estás seguro de que deseas eliminar este pago?");
+            if (confirmDelete) {
+                fetch(`/borrar_pago/${pagoId}`, { 
+                    method: 'DELETE' 
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Error en la respuesta del servidor.");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data);  // Depuración de la respuesta
+                    if (data.success) {
+                        alert(data.message);  // Mensaje de éxito
+                        selectedRow.remove();  // Eliminar la fila de la tabla
+                        selectedRow = null;  // Limpiar la selección
+                    } else {
+                        alert(data.message);  // Mostrar mensaje de error
+                    }
+                })
+                .catch(error => {
+                    alert("Hubo un error al intentar eliminar el pago: " + error.message);
+                    console.error(error);  // Depuración adicional para ver el error
+                });
+            }
+        } else {
+            alert("Selecciona un pago para borrar.");
+        }
+    });
+
+    // Funcionalidad de la búsqueda
+    const searchInput = document.querySelector(".search-input");
+
+    searchInput.addEventListener("input", function() {
+        const filter = searchInput.value.toLowerCase();
+        const rows = document.querySelectorAll("table tbody tr");
+
+        rows.forEach(row => {
+            const cells = row.getElementsByTagName("td");
+            const idPago = cells[1].textContent.toLowerCase();  // Id_Pago está en la segunda columna
+
+            if (idPago.indexOf(filter) > -1) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+});
+
+    </script>
 </body>
 </html>

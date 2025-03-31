@@ -1,59 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Remesas</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/remesa.css') }}">
 </head>
 <body>
-    <!-- Barra de tareas en el lado izquierdo -->
     <div class="task-bar"></div>
-
+    
     <main class="main-container">
         <h1 class="page-title">Tabla Remesa</h1>
-
-        <!-- Barra de búsqueda y botones dentro del main -->
+        
         <div class="input-container">
             <input type="text" class="search-input" placeholder="Buscar...">
             <div class="button-container">
-                <button class="square-button">Actualizar</button>
-                <button class="square-button">Actualizar</button>
+                <button class="square-button actualizar">Actualizar</button>
+                <button class="square-button borrar">Borrar</button>
                 <a href="{{ url_for('create.agregar_remesa') }}">
-
-                    <button>Agregar Inventario</button>
+                    <button>Agregar Remesa</button>
                 </a>
-                <button class="square-button">Borrar</button>
                 <button class="square-button">Adelante</button>
-                <button class="square-button">Atras</button>
+                <button class="square-button">Atrás</button>
             </div>
         </div>
-
-        <!-- Tabla -->
+        
         <table class="table">
             <thead>
                 <tr>
-                    <th class="table-header">Remsa ID</th>
-                    <th class="table-header">Proveedor</th>
-                    <th class="table-header">Codigo Elemento</th>
-                    <th class="table-header">Modelo</th>
-                    <th class="table-header">Nombre</th>
-                    <th class="table-header">Num. Entrdas</th>
-                    <th class="table-header">Factura</th>
-                    <th class="table-header">Fecha</th>
+                    <th>Seleccionar</th>
+                    <th>Remesa ID</th>
+                    <th>Proveedor</th>
+                    <th>Código Elemento</th>
+                    <th>Modelo</th>
+                    <th>Nombre</th>
+                    <th>Num. Entradas</th>
+                    <th>Factura</th>
+                    <th>Fecha</th>
                 </tr>
             </thead>
             <tbody>
-                {% for remesas in datos %}
+                {% for remesa in datos %}
                 <tr>
-                    <td>{{ remesas.id }}</td>  
-                    <td>{{ remesas.Proveedor }}</td>  
-                    <td>{{ remesas.CodigoElemento }}</td>
-                    <td>{{ remesas.Modelo }}</td>
-                    <td>{{ remesas.Nombre }}</td>
-                    <td>{{ remesas.Num_Entradas }}</td>
-                    <td>{{ remesasFactura }}</td> 
-                    <td>{{ remesas.Fecha }}</td>
+                    <td><input type="radio" name="selectRow" class="selectRow" data-id="{{ remesa.id }}"></td>
+                    <td>{{ remesa.id }}</td>
+                    <td>{{ remesa.Proveedor }}</td>
+                    <td>{{ remesa.CodigoElemento }}</td>
+                    <td>{{ remesa.Modelo }}</td>
+                    <td>{{ remesa.Nombre }}</td>
+                    <td>{{ remesa.Num_Entradas }}</td>
+                    <td>{{ remesa.Factura }}</td>
+                    <td>{{ remesa.Fecha }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -61,5 +58,52 @@
     </main>
     <a href="{{ url_for('bienvenida') }}">Regresar</a>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let selectedRow = null;
+
+            document.querySelectorAll(".selectRow").forEach(radio => {
+                radio.addEventListener("change", function() {
+                    if (selectedRow) {
+                        selectedRow.classList.remove("selected");
+                    }
+                    selectedRow = this.closest("tr");
+                    selectedRow.classList.add("selected");
+                });
+            });
+
+            document.querySelector(".square-button.actualizar").addEventListener("click", function() {
+                const seleccionado = document.querySelector(".selectRow:checked");
+                if (seleccionado) {
+                    const idRemesa = seleccionado.dataset.id;
+                    window.location.href = `/actualizar/editar_remesa/${idRemesa}`;
+                } else {
+                    alert("Selecciona una remesa para actualizar.");
+                }
+            });
+
+            document.querySelector(".square-button.borrar").addEventListener("click", function() {
+                const seleccionado = document.querySelector(".selectRow:checked");
+                if (seleccionado) {
+                    const idRemesa = seleccionado.dataset.id;
+                    if (confirm("¿Seguro que quieres eliminar esta remesa?")) {
+                        fetch(`/eliminar/borrar_remesa/${idRemesa}`, { method: 'DELETE' })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert("Remesa eliminada con éxito.");
+                                    seleccionado.closest("tr").remove();
+                                } else {
+                                    alert("Error al eliminar la remesa.");
+                                }
+                            })
+                            .catch(error => console.error("Error:", error));
+                    }
+                } else {
+                    alert("Selecciona una remesa para borrar.");
+                }
+            });
+        });
+    </script>
 </body>
 </html>

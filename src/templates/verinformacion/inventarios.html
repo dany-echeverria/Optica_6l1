@@ -11,18 +11,18 @@
     <div class="task-bar"></div>
 
     <main class="main-container">
-        <h1 class="page-title">Tabla de Proveedores</h1>
+        <h1 class="page-title">Tabla de Inventarios</h1>
 
         <!-- Barra de búsqueda y botones dentro del main -->
         <div class="input-container">
             <input type="text" class="search-input" placeholder="Buscar...">
             <div class="button-container">
-                <button class="square-button">Actualizar</button>
-                <a href="{{ url_for('create.agregar_inventario') }}">
+                <button class="square-button actualizar">Actualizar</button>
 
+                <a href="{{ url_for('create.agregar_inventario') }}">
                     <button>Agregar Inventario</button>
                 </a>
-                <button class="square-button">Borrar</button>
+                <button class="square-button borrar">Borrar</button>
                 <button class="square-button">Adelante</button>
                 <button class="square-button">Atrás</button>
             </div>
@@ -32,6 +32,7 @@
         <table>
             <thead>
                 <tr>
+                    <th>Selecionar</th>
                     <th>Código Producto</th>
                     <th>Id del Proveedor</th>
                     <th>Nombre Producto</th>
@@ -44,6 +45,7 @@
             <tbody>
                 {% for inventarios in datos %}
                     <tr>
+                        <td><input type="radio" name="selectRow" class="selectRow" data-codigo="{{ inventarios.Código_Prod }}"></td>
                         <td>{{ inventarios.Código_Prod }}</td>
                         <td>{{ inventarios.Id_Proveedor }}</td>
                         <td>{{ inventarios.Nombre_Prod }}</td>
@@ -52,6 +54,10 @@
                         <td>{{ inventarios.Cantidad }}</td>
                         <td>{{ inventarios.Materiales }}</td>
                     </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8">No hay inventarios disponibles.</td>
+                    </tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -59,5 +65,76 @@
 
     <a href="{{ url_for('bienvenida') }}">Regresar</a>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let selectedRow = null;
+
+            // Funcionalidad de seleccionar una fila al hacer clic en el radio button
+            document.querySelectorAll(".selectRow").forEach(radio => {
+                radio.addEventListener("change", function() {
+                    // Desmarcar la fila anterior
+                    if (selectedRow) {
+                        selectedRow.classList.remove("selected");
+                    }
+                    // Marcar la fila actual
+                    selectedRow = this.closest("tr");
+                    selectedRow.classList.add("selected");
+                });
+            });
+
+            // Funcionalidad del botón de actualizar
+            document.querySelector(".square-button.actualizar").addEventListener("click", function() {
+                if (selectedRow) {
+                    const codigoProd = selectedRow.querySelector(".selectRow").dataset.codigo;  // Obtener Código_Prod
+                    window.location.href = `/actualizar/editar_producto/${codigoProd}`;  // Redirigir a la página de actualización
+                } else {
+                    alert("Selecciona un producto para actualizar.");
+                }
+            });
+
+            // Funcionalidad de la búsqueda
+            const searchInput = document.querySelector(".search-input");
+
+            searchInput.addEventListener("input", function() {
+                const filter = searchInput.value.toLowerCase();
+                const rows = document.querySelectorAll("table tbody tr");
+
+                rows.forEach(row => {
+                    const cells = row.getElementsByTagName("td");
+                    const nombreProducto = cells[2].textContent.toLowerCase();  // Nombre del producto está en la tercera columna
+
+                    if (nombreProducto.indexOf(filter) > -1) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+            });
+
+           // Funcionalidad del botón de borrar
+           document.querySelector(".square-button.borrar").addEventListener("click", function() {
+                const seleccionado = document.querySelector(".selectRow:checked");
+                if (seleccionado) {
+                    const codigoProd = seleccionado.dataset.codigo;
+                    if (confirm("¿Seguro que quieres eliminar este producto?")) {
+                        fetch(`/eliminar/borrar_producto/${codigoProd}`, { method: 'DELETE' })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert("Producto eliminado con éxito.");
+                                    seleccionado.closest("tr").remove();
+                                } else {
+                                    alert("Error al eliminar el producto.");
+                                }
+                            })
+                            .catch(error => console.error("Error:", error));
+                    }
+                } else {
+                    alert("Selecciona un producto para borrar.");
+                }
+            });
+
+        });
+    </script>
 </body>
 </html>
